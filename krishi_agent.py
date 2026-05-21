@@ -7,11 +7,9 @@ from langchain.tools import tool
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import HumanMessage, AIMessage
 
-# ── STEP 1: Add your free Gemini API key ─────────────────────
-# Get it free at: https://aistudio.google.com → Get API Key
+
 os.environ["GOOGLE_API_KEY"] = "YOUR_GEMINI_API_KEY_HERE"
 
-# ── Nepal district to lat/lon mapping ────────────────────────
 DISTRICTS = {
     "kathmandu": (27.7172, 85.3240),
     "pokhara":   (28.2096, 83.9856),
@@ -25,7 +23,6 @@ DISTRICTS = {
     "janakpur":  (26.7288, 85.9256),
 }
 
-# ── TOOL 1: Weather ───────────────────────────────────────────
 @tool
 def get_weather(district: str) -> str:
     """
@@ -55,7 +52,6 @@ def get_weather(district: str) -> str:
         current = data["current_weather"]
         daily   = data["daily"]
 
-        # Weather code to description
         wcode = current["weathercode"]
         if   wcode == 0:          desc = "Clear sky"
         elif wcode in [1,2,3]:    desc = "Partly cloudy"
@@ -87,14 +83,13 @@ def get_weather(district: str) -> str:
         return f"Could not fetch weather data: {e}"
 
 
-# ── TOOL 2: Market Price (placeholder for Week 2) ────────────
 @tool
 def get_market_price(crop: str) -> str:
     """
     Get today's market price for a crop/vegetable in Nepal (Kalimati market).
     Use when a farmer asks about vegetable or crop prices.
     """
-    # Week 2: replace this with real Kalimati scraper
+
     return (
         f"Market price tool coming in Week 2!\n"
         f"For now, check: https://kalimatimarket.gov.np\n"
@@ -102,7 +97,6 @@ def get_market_price(crop: str) -> str:
     )
 
 
-# ── TOOL 3: Crop Disease (placeholder for Week 3) ────────────
 @tool
 def check_crop_disease(description: str) -> str:
     """
@@ -110,7 +104,7 @@ def check_crop_disease(description: str) -> str:
     In Week 3 this will accept photos via Gemini Vision.
     For now, provide advice based on described symptoms.
     """
-    # Week 3: upgrade to Gemini Vision with actual image input
+
     return (
         f"Analyzing symptoms: {description}\n"
         f"Photo disease detection coming in Week 3 with Gemini Vision!\n"
@@ -118,9 +112,9 @@ def check_crop_disease(description: str) -> str:
     )
 
 
-# ── AGENT SETUP ───────────────────────────────────────────────
+
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",   # free tier model
+    model="gemini-1.5-flash",   
     temperature=0.3,
 )
 
@@ -153,13 +147,11 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
 
 
-# ── GRADIO CHAT UI ────────────────────────────────────────────
 chat_history = []
 
 def chat(user_message, history):
     global chat_history
 
-    # Convert Gradio history to LangChain format
     lc_history = []
     for human, ai in (history or []):
         lc_history.append(HumanMessage(content=human))
@@ -192,4 +184,4 @@ demo = gr.ChatInterface(
 )
 
 if __name__ == "__main__":
-    demo.launch(share=True)  # share=True gives a public URL
+    demo.launch(share=True)  
